@@ -1,17 +1,38 @@
-step1
-sudo yum install java-11-amazon-corretto-headless -y
-sudo yum install java-11-amazon-corretto -y
+#!/bin/bash
+set -e
 
-step2
-sudo amazon-linux-extras install epel -y
+echo "Updating package list..."
+sudo apt update
 
-step3
-sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat/jenkins.repo
-sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
-sudo yum install jenkins -y
-service jenkins start
-service jenkins status
-systemctl enable jenkins
+echo "Installing OpenJDK 11..."
+sudo apt install -y openjdk-11-jdk
 
-step4 
-sudo yum install git -y
+echo "Adding Jenkins repository key and source list..."
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list
+
+echo "Updating package list after adding Jenkins repo..."
+sudo apt update
+
+echo "Installing Jenkins..."
+sudo apt install -y jenkins
+
+echo "Starting and enabling Jenkins service..."
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+
+echo "Installing Git..."
+sudo apt install -y git
+
+echo "Opening firewall port 8080 for Jenkins (if ufw is active)..."
+if sudo ufw status | grep -q "Status: active"; then
+    sudo ufw allow 8080/tcp
+    echo "Port 8080 opened in ufw firewall."
+else
+    echo "ufw firewall inactive or not installed, skipping firewall config."
+fi
+
+echo "Jenkins installation complete!"
+echo "You can check Jenkins status with: sudo systemctl status jenkins"
+echo "Initial admin password:"
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
