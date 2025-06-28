@@ -51,4 +51,4 @@ echo "Restarting and enabling Apache server..."
 sudo systemctl restart apache2
 sudo systemctl enable apache2
 
-echo "✅ Installation complete! Access LAM at: http://<your-server-ip>/lam"
+echo "✅ Installation complete! Access LAM at: http://16.170.172.66/lam"
